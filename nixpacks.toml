@@ -1,0 +1,9 @@
+[phases.build]
+cmds = ["npm run build"]
+
+[phases.install]
+cmds = ["npm ci --prefer-offline"]
+
+[start]
+cmd = "npm start"
+
