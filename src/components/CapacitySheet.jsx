@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
-  getCapacityEntry, 
+  getCapacityByEmployeeAndProject,
   updateCapacityEntry,
   calculateTotalsByCountry,
   calculateGrandTotal
@@ -41,29 +41,26 @@ const CapacitySheet = ({ employee, project }) => {
     
     setIsLoading(true);
     try {
+      const entries = await getCapacityByEmployeeAndProject(employee.id, project.id);
+      const entriesByKey = new Map();
+      entries.forEach(entry => {
+        const key = `${entry.country}|${entry.taskGroupId}|${entry.metricId}`;
+        entriesByKey.set(key, entry);
+      });
+
       const data = {};
-      
-      // Build list of all entries to fetch
-      const fetchPromises = [];
       project.countries.forEach(country => {
         project.taskGroups?.forEach(taskGroup => {
           taskGroup.metrics?.forEach(metric => {
             const key = `${country}|${taskGroup.id}|${metric.id}`;
-            fetchPromises.push(
-              getCapacityEntry(employee.id, project.id, country, taskGroup.id, metric.id)
-                .then(entry => ({ key, entry }))
-            );
+            const entry = entriesByKey.get(key);
+            data[key] = {
+              timePerUnit: entry?.timePerUnit || 0,
+              count: entry?.count || 0,
+              total: entry?.total || 0
+            };
           });
         });
-      });
-
-      const results = await Promise.all(fetchPromises);
-      results.forEach(({ key, entry }) => {
-        data[key] = {
-          timePerUnit: entry?.timePerUnit || 0,
-          count: entry?.count || 0,
-          total: entry?.total || 0
-        };
       });
       
       setCapacityData(data);
