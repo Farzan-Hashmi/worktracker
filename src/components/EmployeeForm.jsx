@@ -6,11 +6,17 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
   const [selectedProjects, setSelectedProjects] = useState([]);
   const [activeProjectId, setActiveProjectId] = useState('');
   const [assignedCountriesByProject, setAssignedCountriesByProject] = useState({});
+  const [annualWorkingHours, setAnnualWorkingHours] = useState('');
 
   useEffect(() => {
     if (employeeToEdit) {
       setName(employeeToEdit.name);
       setEmail(employeeToEdit.email || '');
+      setAnnualWorkingHours(
+        employeeToEdit.annualWorkingHours !== null && employeeToEdit.annualWorkingHours !== undefined
+          ? String(employeeToEdit.annualWorkingHours)
+          : ''
+      );
       const assignedProjects = employeeToEdit.assignedProjects || (employeeToEdit.defaultProjectId ? [employeeToEdit.defaultProjectId] : []);
       const countriesByProject = employeeToEdit.assignedCountriesByProject || (employeeToEdit.defaultProjectId
         ? { [employeeToEdit.defaultProjectId]: employeeToEdit.assignedCountries || [] }
@@ -82,6 +88,7 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
     e.preventDefault();
     if (name.trim()) {
       const defaultProjectId = activeProjectId || selectedProjects[0] || '';
+      const parsedAnnualHours = annualWorkingHours === '' ? null : Number(annualWorkingHours);
       onSave({
         id: employeeToEdit?.id,
         name: name.trim(),
@@ -89,11 +96,13 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
         defaultProjectId,
         assignedProjects: selectedProjects,
         assignedCountriesByProject: assignedCountriesByProject,
-        assignedCountries: defaultProjectId ? (assignedCountriesByProject[defaultProjectId] || []) : []
+        assignedCountries: defaultProjectId ? (assignedCountriesByProject[defaultProjectId] || []) : [],
+        annualWorkingHours: Number.isFinite(parsedAnnualHours) ? parsedAnnualHours : null
       });
       // Reset form
       setName('');
       setEmail('');
+      setAnnualWorkingHours('');
       setSelectedProjects([]);
       setActiveProjectId('');
       setAssignedCountriesByProject({});
@@ -103,6 +112,7 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
   const handleReset = () => {
     setName('');
     setEmail('');
+    setAnnualWorkingHours('');
     setSelectedProjects([]);
     setActiveProjectId('');
     setAssignedCountriesByProject({});
@@ -133,6 +143,19 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="employee@example.com"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="annualWorkingHours">Total number of annual working hours</label>
+          <input
+            type="number"
+            id="annualWorkingHours"
+            min="0"
+            step="1"
+            value={annualWorkingHours}
+            onChange={(e) => setAnnualWorkingHours(e.target.value)}
+            placeholder="e.g. 2080"
           />
         </div>
 

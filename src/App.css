@@ -732,6 +732,16 @@ body {
   margin-left: 0.5rem;
 }
 
+.total-hours-over {
+  color: #d32f2f;
+}
+
+.total-hours-limit {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+  margin-left: 0.25rem;
+}
+
 /* Capacity Content - New Simpler Layout */
 .capacity-content {
   padding: 1.5rem;

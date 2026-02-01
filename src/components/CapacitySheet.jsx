@@ -151,7 +151,21 @@ const CapacitySheet = ({ employee, project }) => {
       <div className="sheet-header">
         <h3>{employee.name} - {project.name}</h3>
         <div className="total-hours">
-          Total Hours: <strong>{totals.overall?.toFixed(2) || '0.00'}</strong>
+          {(() => {
+            const annualLimit = employee.annualWorkingHours;
+            const isOverLimit = typeof annualLimit === 'number' && totals.overall > annualLimit;
+            return (
+              <>
+                Total Hours:{' '}
+                <strong className={isOverLimit ? 'total-hours-over' : undefined}>
+                  {totals.overall?.toFixed(2) || '0.00'}
+                </strong>
+                {typeof annualLimit === 'number' && (
+                  <span className="total-hours-limit"> / {annualLimit}</span>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 

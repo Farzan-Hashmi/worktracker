@@ -25,6 +25,7 @@ function formatEmployee(emp) {
     assignedCountries: legacyCountries,
     assignedProjects,
     assignedCountriesByProject,
+    annualWorkingHours: emp.annual_working_hours,
     createdAt: emp.created_at
   };
 }
@@ -57,15 +58,15 @@ router.get('/:id', (req, res) => {
 // POST create employee
 router.post('/', (req, res) => {
   try {
-    const { id, name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject } = req.body;
+    const { id, name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject, annualWorkingHours } = req.body;
     const employeeId = id || `emp_${Date.now()}`;
     const createdAt = new Date().toISOString();
     const normalizedAssignedProjects = assignedProjects || (defaultProjectId ? [defaultProjectId] : []);
     const normalizedCountriesByProject = assignedCountriesByProject || (defaultProjectId ? { [defaultProjectId]: assignedCountries || [] } : {});
 
     db.prepare(`
-      INSERT INTO employees (id, name, email, default_project_id, assigned_countries, assigned_projects, assigned_countries_by_project, created_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO employees (id, name, email, default_project_id, assigned_countries, assigned_projects, assigned_countries_by_project, annual_working_hours, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       employeeId, 
       name, 
@@ -74,6 +75,7 @@ router.post('/', (req, res) => {
       JSON.stringify(assignedCountries || []),
       JSON.stringify(normalizedAssignedProjects),
       JSON.stringify(normalizedCountriesByProject),
+      annualWorkingHours ?? null,
       createdAt
     );
 
@@ -88,7 +90,7 @@ router.post('/', (req, res) => {
 // PUT update employee
 router.put('/:id', (req, res) => {
   try {
-    const { name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject } = req.body;
+    const { name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject, annualWorkingHours } = req.body;
     const employee = db.prepare('SELECT * FROM employees WHERE id = ?').get(req.params.id);
     
     if (!employee) {
@@ -105,7 +107,7 @@ router.put('/:id', (req, res) => {
 
     db.prepare(`
       UPDATE employees 
-      SET name = ?, email = ?, default_project_id = ?, assigned_countries = ?, assigned_projects = ?, assigned_countries_by_project = ?
+      SET name = ?, email = ?, default_project_id = ?, assigned_countries = ?, assigned_projects = ?, assigned_countries_by_project = ?, annual_working_hours = ?
       WHERE id = ?
     `).run(
       name || employee.name, 
@@ -114,6 +116,7 @@ router.put('/:id', (req, res) => {
       assignedCountries !== undefined ? JSON.stringify(assignedCountries) : employee.assigned_countries,
       JSON.stringify(normalizedAssignedProjects),
       JSON.stringify(normalizedCountriesByProject),
+      annualWorkingHours ?? employee.annual_working_hours ?? null,
       req.params.id
     );
 

@@ -56,6 +56,7 @@ function initializeDatabase() {
       assigned_countries TEXT DEFAULT '[]',
       assigned_projects TEXT DEFAULT '[]',
       assigned_countries_by_project TEXT DEFAULT '{}',
+      annual_working_hours REAL DEFAULT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -78,6 +79,11 @@ function initializeDatabase() {
   }
   try {
     db.exec(`ALTER TABLE employees ADD COLUMN assigned_countries_by_project TEXT DEFAULT '{}'`);
+  } catch (e) {
+    // Column already exists, ignore
+  }
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN annual_working_hours REAL DEFAULT NULL`);
   } catch (e) {
     // Column already exists, ignore
   }

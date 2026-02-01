@@ -49,6 +49,12 @@ const EmployeeList = ({ employees, projects = [], onEdit, onDelete }) => {
               );
             })()}
 
+            {employee.annualWorkingHours !== null && employee.annualWorkingHours !== undefined && (
+              <div className="employee-project">
+                <strong>Annual working hours:</strong> {employee.annualWorkingHours}
+              </div>
+            )}
+
             {(() => {
               const countriesByProject = employee.assignedCountriesByProject || {};
               const projectIds = Object.keys(countriesByProject);
