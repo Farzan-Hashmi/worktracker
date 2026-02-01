@@ -3,6 +3,7 @@ import EmployeeForm from './EmployeeForm';
 import EmployeeList from './EmployeeList';
 import { 
   getEmployees, 
+  getProjects,
   addEmployee,
   updateEmployee,
   deleteEmployee 
@@ -10,19 +11,24 @@ import {
 
 const EmployeeManager = () => {
   const [employees, setEmployees] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadEmployees();
+    loadData();
   }, []);
 
-  const loadEmployees = async () => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      const data = await getEmployees();
-      setEmployees(data);
+      const [employeeData, projectData] = await Promise.all([
+        getEmployees(),
+        getProjects()
+      ]);
+      setEmployees(employeeData);
+      setProjects(projectData);
     } catch (error) {
       console.error('Error loading employees:', error);
     } finally {
@@ -37,7 +43,7 @@ const EmployeeManager = () => {
       } else {
         await addEmployee(employeeData);
       }
-      await loadEmployees();
+      await loadData();
       setShowForm(false);
       setEditingEmployee(null);
     } catch (error) {
@@ -54,7 +60,7 @@ const EmployeeManager = () => {
     if (window.confirm('Are you sure you want to delete this employee? This will also delete all their capacity data.')) {
       try {
         await deleteEmployee(id);
-        await loadEmployees();
+        await loadData();
       } catch (error) {
         console.error('Error deleting employee:', error);
       }
@@ -98,6 +104,7 @@ const EmployeeManager = () => {
 
       <EmployeeList
         employees={employees}
+        projects={projects}
         onEdit={handleEditEmployee}
         onDelete={handleDeleteEmployee}
       />

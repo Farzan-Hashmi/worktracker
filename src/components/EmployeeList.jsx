@@ -1,7 +1,4 @@
-import { getProjects } from '../services/dataService';
-
-const EmployeeList = ({ employees, onEdit, onDelete }) => {
-  const projects = getProjects();
+const EmployeeList = ({ employees, projects = [], onEdit, onDelete }) => {
 
   const getProjectName = (projectId) => {
     const project = projects.find(p => p.id === projectId);
