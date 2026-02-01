@@ -580,57 +580,66 @@ body {
 }
 
 .country-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: white;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
-  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  background: white !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: background 0.2s !important;
+  box-sizing: border-box !important;
 }
 
 .country-checkbox:hover {
-  background: #e3f2fd;
+  background: #e3f2fd !important;
 }
 
+.country-checkbox input,
 .country-checkbox input[type="checkbox"] {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #999;
-  border-radius: 3px;
-  background: white;
-  cursor: pointer;
-  margin: 0;
-  flex-shrink: 0;
-  position: relative;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  min-height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
+  border: 2px solid #667eea !important;
+  border-radius: 4px !important;
+  background: white !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+  display: inline-block !important;
 }
 
+.country-checkbox input:checked,
 .country-checkbox input[type="checkbox"]:checked {
-  background: #667eea;
-  border-color: #667eea;
+  background: #667eea !important;
+  border-color: #667eea !important;
 }
 
+.country-checkbox input:checked::after,
 .country-checkbox input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 5px;
-  height: 9px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  content: '' !important;
+  position: absolute !important;
+  left: 5px !important;
+  top: 1px !important;
+  width: 6px !important;
+  height: 12px !important;
+  border: solid white !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) !important;
 }
 
 .country-checkbox span {
-  font-size: 14px;
-  color: #333;
-  line-height: 16px;
+  font-size: 15px !important;
+  color: #333 !important;
+  line-height: 20px !important;
 }
 
 /* Employee Form Select */
