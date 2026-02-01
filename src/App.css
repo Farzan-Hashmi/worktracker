@@ -583,12 +583,12 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   background: white;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s;
-  min-height: 40px;
+  min-height: 44px;
   box-sizing: border-box;
 }
 
@@ -602,14 +602,16 @@ body {
   cursor: pointer;
   margin: 0;
   flex: 0 0 auto;
+  transform: translateY(1px);
 }
 
 .country-checkbox span {
   font-size: 0.9rem;
   color: #333;
-  line-height: 1.2;
+  line-height: 1;
   word-break: break-word;
-  padding-left: 0.25rem;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Employee Form Select */
