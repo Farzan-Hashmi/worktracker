@@ -16,9 +16,11 @@ const CapacitySheet = ({ employee, project }) => {
     
     const newTotals = { byCountry: {}, overall: 0 };
 
-    // Get employee's countries
-    const employeeCountries = employee.assignedCountries && employee.assignedCountries.length > 0
-      ? project.countries.filter(country => employee.assignedCountries.includes(country))
+    // Get employee's countries for this project
+    const projectCountries = employee.assignedCountriesByProject?.[project.id]
+      || (employee.defaultProjectId === project.id ? employee.assignedCountries : null);
+    const employeeCountries = projectCountries && projectCountries.length > 0
+      ? project.countries.filter(country => projectCountries.includes(country))
       : project.countries;
 
     // Calculate totals for each country
@@ -121,8 +123,10 @@ const CapacitySheet = ({ employee, project }) => {
   }
 
   // Filter countries based on employee's assigned countries
-  const employeeCountries = employee.assignedCountries && employee.assignedCountries.length > 0
-    ? project.countries.filter(country => employee.assignedCountries.includes(country))
+  const projectCountries = employee.assignedCountriesByProject?.[project.id]
+    || (employee.defaultProjectId === project.id ? employee.assignedCountries : null);
+  const employeeCountries = projectCountries && projectCountries.length > 0
+    ? project.countries.filter(country => projectCountries.includes(country))
     : project.countries; // Show all if none assigned
 
   if (employeeCountries.length === 0) {

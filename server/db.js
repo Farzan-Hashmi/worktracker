@@ -54,6 +54,8 @@ function initializeDatabase() {
       email TEXT DEFAULT '',
       default_project_id TEXT DEFAULT '',
       assigned_countries TEXT DEFAULT '[]',
+      assigned_projects TEXT DEFAULT '[]',
+      assigned_countries_by_project TEXT DEFAULT '{}',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -66,6 +68,16 @@ function initializeDatabase() {
   }
   try {
     db.exec(`ALTER TABLE employees ADD COLUMN assigned_countries TEXT DEFAULT '[]'`);
+  } catch (e) {
+    // Column already exists, ignore
+  }
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN assigned_projects TEXT DEFAULT '[]'`);
+  } catch (e) {
+    // Column already exists, ignore
+  }
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN assigned_countries_by_project TEXT DEFAULT '{}'`);
   } catch (e) {
     // Column already exists, ignore
   }

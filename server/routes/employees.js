@@ -5,12 +5,26 @@ const router = express.Router();
 
 // Helper to format employee for response
 function formatEmployee(emp) {
+  const assignedProjects = JSON.parse(emp.assigned_projects || '[]');
+  const assignedCountriesByProject = JSON.parse(emp.assigned_countries_by_project || '{}');
+  const legacyCountries = JSON.parse(emp.assigned_countries || '[]');
+  const legacyProjectId = emp.default_project_id || '';
+
+  if (assignedProjects.length === 0 && legacyProjectId) {
+    assignedProjects.push(legacyProjectId);
+  }
+  if (Object.keys(assignedCountriesByProject).length === 0 && legacyProjectId) {
+    assignedCountriesByProject[legacyProjectId] = legacyCountries;
+  }
+
   return {
     id: emp.id,
     name: emp.name,
     email: emp.email || '',
     defaultProjectId: emp.default_project_id || '',
-    assignedCountries: JSON.parse(emp.assigned_countries || '[]'),
+    assignedCountries: legacyCountries,
+    assignedProjects,
+    assignedCountriesByProject,
     createdAt: emp.created_at
   };
 }
@@ -43,19 +57,23 @@ router.get('/:id', (req, res) => {
 // POST create employee
 router.post('/', (req, res) => {
   try {
-    const { id, name, email, defaultProjectId, assignedCountries } = req.body;
+    const { id, name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject } = req.body;
     const employeeId = id || `emp_${Date.now()}`;
     const createdAt = new Date().toISOString();
+    const normalizedAssignedProjects = assignedProjects || (defaultProjectId ? [defaultProjectId] : []);
+    const normalizedCountriesByProject = assignedCountriesByProject || (defaultProjectId ? { [defaultProjectId]: assignedCountries || [] } : {});
 
     db.prepare(`
-      INSERT INTO employees (id, name, email, default_project_id, assigned_countries, created_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO employees (id, name, email, default_project_id, assigned_countries, assigned_projects, assigned_countries_by_project, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       employeeId, 
       name, 
       email || '', 
       defaultProjectId || '',
       JSON.stringify(assignedCountries || []),
+      JSON.stringify(normalizedAssignedProjects),
+      JSON.stringify(normalizedCountriesByProject),
       createdAt
     );
 
@@ -70,22 +88,32 @@ router.post('/', (req, res) => {
 // PUT update employee
 router.put('/:id', (req, res) => {
   try {
-    const { name, email, defaultProjectId, assignedCountries } = req.body;
+    const { name, email, defaultProjectId, assignedCountries, assignedProjects, assignedCountriesByProject } = req.body;
     const employee = db.prepare('SELECT * FROM employees WHERE id = ?').get(req.params.id);
     
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
+    const normalizedAssignedProjects = assignedProjects !== undefined
+      ? assignedProjects
+      : JSON.parse(employee.assigned_projects || '[]');
+
+    const normalizedCountriesByProject = assignedCountriesByProject !== undefined
+      ? assignedCountriesByProject
+      : JSON.parse(employee.assigned_countries_by_project || '{}');
+
     db.prepare(`
       UPDATE employees 
-      SET name = ?, email = ?, default_project_id = ?, assigned_countries = ?
+      SET name = ?, email = ?, default_project_id = ?, assigned_countries = ?, assigned_projects = ?, assigned_countries_by_project = ?
       WHERE id = ?
     `).run(
       name || employee.name, 
       email !== undefined ? email : employee.email,
       defaultProjectId !== undefined ? defaultProjectId : (employee.default_project_id || ''),
       assignedCountries !== undefined ? JSON.stringify(assignedCountries) : employee.assigned_countries,
+      JSON.stringify(normalizedAssignedProjects),
+      JSON.stringify(normalizedCountriesByProject),
       req.params.id
     );
 

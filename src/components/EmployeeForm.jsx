@@ -3,60 +3,109 @@ import { useState, useEffect } from 'react';
 const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [selectedProject, setSelectedProject] = useState('');
-  const [assignedCountries, setAssignedCountries] = useState([]);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+  const [activeProjectId, setActiveProjectId] = useState('');
+  const [assignedCountriesByProject, setAssignedCountriesByProject] = useState({});
 
   useEffect(() => {
     if (employeeToEdit) {
       setName(employeeToEdit.name);
       setEmail(employeeToEdit.email || '');
-      setSelectedProject(employeeToEdit.defaultProjectId || '');
-      setAssignedCountries(employeeToEdit.assignedCountries || []);
+      const assignedProjects = employeeToEdit.assignedProjects || (employeeToEdit.defaultProjectId ? [employeeToEdit.defaultProjectId] : []);
+      const countriesByProject = employeeToEdit.assignedCountriesByProject || (employeeToEdit.defaultProjectId
+        ? { [employeeToEdit.defaultProjectId]: employeeToEdit.assignedCountries || [] }
+        : {});
+      setSelectedProjects(assignedProjects);
+      setAssignedCountriesByProject(countriesByProject);
+      setActiveProjectId(assignedProjects[0] || '');
     }
   }, [employeeToEdit]);
 
-  const currentProject = projects.find(p => p.id === selectedProject);
-  const availableCountries = currentProject?.countries || [];
+  useEffect(() => {
+    if (activeProjectId && !selectedProjects.includes(activeProjectId)) {
+      setActiveProjectId(selectedProjects[0] || '');
+    }
+  }, [activeProjectId, selectedProjects]);
 
-  const handleToggleCountry = (country) => {
-    if (assignedCountries.includes(country)) {
-      setAssignedCountries(assignedCountries.filter(c => c !== country));
-    } else {
-      setAssignedCountries([...assignedCountries, country]);
+  const currentProject = projects.find(p => p.id === activeProjectId);
+  const availableCountries = currentProject?.countries || [];
+  const assignedCountries = assignedCountriesByProject[activeProjectId] || [];
+
+  const handleToggleProject = (projectId) => {
+    if (selectedProjects.includes(projectId)) {
+      const updatedProjects = selectedProjects.filter(id => id !== projectId);
+      const updatedCountriesByProject = { ...assignedCountriesByProject };
+      delete updatedCountriesByProject[projectId];
+      setSelectedProjects(updatedProjects);
+      setAssignedCountriesByProject(updatedCountriesByProject);
+      if (activeProjectId === projectId) {
+        setActiveProjectId(updatedProjects[0] || '');
+      }
+      return;
+    }
+
+    setSelectedProjects(prev => [...prev, projectId]);
+    setAssignedCountriesByProject(prev => ({ ...prev, [projectId]: prev[projectId] || [] }));
+    if (!activeProjectId) {
+      setActiveProjectId(projectId);
     }
   };
 
+  const handleToggleCountry = (country) => {
+    if (!activeProjectId) return;
+    const updatedCountries = assignedCountries.includes(country)
+      ? assignedCountries.filter(c => c !== country)
+      : [...assignedCountries, country];
+    setAssignedCountriesByProject(prev => ({
+      ...prev,
+      [activeProjectId]: updatedCountries
+    }));
+  };
+
   const handleSelectAll = () => {
-    setAssignedCountries([...availableCountries]);
+    if (!activeProjectId) return;
+    setAssignedCountriesByProject(prev => ({
+      ...prev,
+      [activeProjectId]: [...availableCountries]
+    }));
   };
 
   const handleClearAll = () => {
-    setAssignedCountries([]);
+    if (!activeProjectId) return;
+    setAssignedCountriesByProject(prev => ({
+      ...prev,
+      [activeProjectId]: []
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (name.trim()) {
+      const defaultProjectId = activeProjectId || selectedProjects[0] || '';
       onSave({
         id: employeeToEdit?.id,
         name: name.trim(),
         email: email.trim(),
-        defaultProjectId: selectedProject,
-        assignedCountries: assignedCountries
+        defaultProjectId,
+        assignedProjects: selectedProjects,
+        assignedCountriesByProject: assignedCountriesByProject,
+        assignedCountries: defaultProjectId ? (assignedCountriesByProject[defaultProjectId] || []) : []
       });
       // Reset form
       setName('');
       setEmail('');
-      setSelectedProject('');
-      setAssignedCountries([]);
+      setSelectedProjects([]);
+      setActiveProjectId('');
+      setAssignedCountriesByProject({});
     }
   };
 
   const handleReset = () => {
     setName('');
     setEmail('');
-    setSelectedProject('');
-    setAssignedCountries([]);
+    setSelectedProjects([]);
+    setActiveProjectId('');
+    setAssignedCountriesByProject({});
     if (onCancel) onCancel();
   };
 
@@ -88,25 +137,42 @@ const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="projectSelect">Assign to Project</label>
-          <select
-            id="projectSelect"
-            value={selectedProject}
-            onChange={(e) => {
-              setSelectedProject(e.target.value);
-              setAssignedCountries([]); // Reset countries when project changes
-            }}
-          >
-            <option value="">-- Select a project --</option>
+          <label>Assign to Projects</label>
+          <div className="country-checkbox-grid">
             {projects.map(project => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
+              <label key={project.id} className="country-checkbox">
+                <input
+                  type="checkbox"
+                  checked={selectedProjects.includes(project.id)}
+                  onChange={() => handleToggleProject(project.id)}
+                />
+                <span>{project.name}</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
 
-        {selectedProject && availableCountries.length > 0 && (
+        {selectedProjects.length > 0 && (
+          <div className="form-group">
+            <label htmlFor="activeProjectSelect">Edit Countries For</label>
+            <select
+              id="activeProjectSelect"
+              value={activeProjectId}
+              onChange={(e) => setActiveProjectId(e.target.value)}
+            >
+              {selectedProjects.map(projectId => {
+                const project = projects.find(p => p.id === projectId);
+                return (
+                  <option key={projectId} value={projectId}>
+                    {project?.name || projectId}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        )}
+
+        {activeProjectId && availableCountries.length > 0 && (
           <div className="form-group">
             <label>Assign Countries ({assignedCountries.length} selected)</label>
             <div className="country-selection-actions">
