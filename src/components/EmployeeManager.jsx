@@ -97,6 +97,7 @@ const EmployeeManager = () => {
       {showForm && (
         <EmployeeForm
           employeeToEdit={editingEmployee}
+          projects={projects}
           onSave={handleSaveEmployee}
           onCancel={handleCancel}
         />

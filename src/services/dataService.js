@@ -28,8 +28,11 @@ async function apiCall(endpoint, options = {}) {
 
 // Cache for data to reduce API calls
 let projectsCache = null;
+let projectsPromise = null;
 let employeesCache = null;
+let employeesPromise = null;
 let capacityCache = null;
+let capacityPromise = null;
 
 // Initialize data - now just loads from API
 export const initializeData = async () => {
@@ -46,14 +49,26 @@ export const initializeData = async () => {
 };
 
 // Project operations
-export const getProjects = async () => {
-  try {
-    projectsCache = await apiCall('/projects');
+export const getProjects = async ({ force = false } = {}) => {
+  if (!force && projectsCache) {
     return projectsCache;
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    return projectsCache || [];
   }
+  if (!force && projectsPromise) {
+    return projectsPromise;
+  }
+  projectsPromise = apiCall('/projects')
+    .then((data) => {
+      projectsCache = data;
+      return data;
+    })
+    .catch((error) => {
+      console.error('Error fetching projects:', error);
+      return projectsCache || [];
+    })
+    .finally(() => {
+      projectsPromise = null;
+    });
+  return projectsPromise;
 };
 
 export const getProjectById = async (id) => {
@@ -141,14 +156,26 @@ export const deleteMetric = async (projectId, taskGroupId, metricId) => {
 };
 
 // Employee operations
-export const getEmployees = async () => {
-  try {
-    employeesCache = await apiCall('/employees');
+export const getEmployees = async ({ force = false } = {}) => {
+  if (!force && employeesCache) {
     return employeesCache;
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-    return employeesCache || [];
   }
+  if (!force && employeesPromise) {
+    return employeesPromise;
+  }
+  employeesPromise = apiCall('/employees')
+    .then((data) => {
+      employeesCache = data;
+      return data;
+    })
+    .catch((error) => {
+      console.error('Error fetching employees:', error);
+      return employeesCache || [];
+    })
+    .finally(() => {
+      employeesPromise = null;
+    });
+  return employeesPromise;
 };
 
 export const getEmployeeById = async (id) => {
@@ -185,14 +212,26 @@ export const deleteEmployee = async (id) => {
 };
 
 // Capacity operations
-export const getCapacity = async () => {
-  try {
-    capacityCache = await apiCall('/capacity');
+export const getCapacity = async ({ force = false } = {}) => {
+  if (!force && capacityCache) {
     return capacityCache;
-  } catch (error) {
-    console.error('Error fetching capacity:', error);
-    return capacityCache || [];
   }
+  if (!force && capacityPromise) {
+    return capacityPromise;
+  }
+  capacityPromise = apiCall('/capacity')
+    .then((data) => {
+      capacityCache = data;
+      return data;
+    })
+    .catch((error) => {
+      console.error('Error fetching capacity:', error);
+      return capacityCache || [];
+    })
+    .finally(() => {
+      capacityPromise = null;
+    });
+  return capacityPromise;
 };
 
 export const getCapacityByEmployee = async (employeeId) => {

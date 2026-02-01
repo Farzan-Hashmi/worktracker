@@ -1,30 +1,10 @@
 import { useState, useEffect } from 'react';
-import { getProjects } from '../services/dataService';
 
-const EmployeeForm = ({ employeeToEdit, onSave, onCancel }) => {
+const EmployeeForm = ({ employeeToEdit, projects = [], onSave, onCancel }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [selectedProject, setSelectedProject] = useState('');
   const [assignedCountries, setAssignedCountries] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      setIsLoading(true);
-      try {
-        const projectData = await getProjects();
-        setProjects(projectData || []);
-      } catch (error) {
-        console.error('Error loading projects:', error);
-        setProjects([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadProjects();
-  }, []);
 
   useEffect(() => {
     if (employeeToEdit) {
@@ -79,15 +59,6 @@ const EmployeeForm = ({ employeeToEdit, onSave, onCancel }) => {
     setAssignedCountries([]);
     if (onCancel) onCancel();
   };
-
-  if (isLoading) {
-    return (
-      <div className="employee-form">
-        <h3>{employeeToEdit ? 'Edit Employee' : 'Add New Employee'}</h3>
-        <div className="loading">Loading projects...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="employee-form">
