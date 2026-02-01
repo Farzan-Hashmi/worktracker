@@ -582,13 +582,12 @@ body {
 .country-checkbox {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 8px;
+  padding: 8px 12px;
   background: white;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s;
-  min-height: 44px;
   box-sizing: border-box;
 }
 
@@ -597,21 +596,41 @@ body {
 }
 
 .country-checkbox input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #999;
+  border-radius: 3px;
+  background: white;
   cursor: pointer;
   margin: 0;
-  flex: 0 0 auto;
-  transform: translateY(1px);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.country-checkbox input[type="checkbox"]:checked {
+  background: #667eea;
+  border-color: #667eea;
+}
+
+.country-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .country-checkbox span {
-  font-size: 0.9rem;
+  font-size: 14px;
   color: #333;
-  line-height: 1;
-  word-break: break-word;
-  display: inline-flex;
-  align-items: center;
+  line-height: 16px;
 }
 
 /* Employee Form Select */
