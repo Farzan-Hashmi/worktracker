@@ -52,9 +52,23 @@ function initializeDatabase() {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       email TEXT DEFAULT '',
+      default_project_id TEXT DEFAULT '',
+      assigned_countries TEXT DEFAULT '[]',
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Migration: Add missing columns to existing employees table
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN default_project_id TEXT DEFAULT ''`);
+  } catch (e) {
+    // Column already exists, ignore
+  }
+  try {
+    db.exec(`ALTER TABLE employees ADD COLUMN assigned_countries TEXT DEFAULT '[]'`);
+  } catch (e) {
+    // Column already exists, ignore
+  }
 
   // Capacity table
   db.exec(`
@@ -84,4 +98,3 @@ function initializeDatabase() {
 initializeDatabase();
 
 export default db;
-
